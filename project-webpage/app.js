@@ -46,6 +46,14 @@
     button.disabled = true;
     controls[action[0]] = button;
   });
+  ['map-basemap', 'map-buildings', 'map-view-2d', 'map-view-3d',
+    'map-bearing', 'map-pitch'].forEach(function (id) {
+    var control = document.getElementById(id);
+    if (control) {
+      control.disabled = true;
+      controls[id] = control;
+    }
+  });
 
   // A missing epoch or an explicit matched-sample time gap ends the current run.
   // Isolated valid epochs are retained and rendered as points.
@@ -71,8 +79,31 @@
     });
   }
 
+  function blankStyle() {
+    return { version: 8, sources: {}, layers: [
+      { id: 'background', type: 'background', paint: { 'background-color': '#e9eeec' } }
+    ] };
+  }
+
+  function osmStyle() {
+    return {
+      version: 8,
+      sources: {
+        'osm-streets': {
+          type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+          tileSize: 256, maxzoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }
+      },
+      layers: [{ id: 'osm-streets', type: 'raster', source: 'osm-streets' }]
+    };
+  }
+
   function start(data) {
-    if (!window.L) throw new Error('The map library could not be loaded.');
+    if (!window.maplibregl) throw new Error('The map library could not be loaded.');
+    if (typeof maplibregl.supported === 'function' && !maplibregl.supported()) {
+      throw new Error('WebGL is unavailable in this browser.');
+    }
     if (!validateTrack(data.gt) || !data.methods || typeof data.methods !== 'object') {
       throw new Error('The trajectory export has an invalid format.');
     }
@@ -84,61 +115,84 @@
       }
     });
 
-    container.replaceChildren();
-    var map = L.map(container, { scrollWheelZoom: false, preferCanvas: true });
-    L.control.scale({ imperial: false }).addTo(map);
+    var map;
     var entries = [];
-    var tileWarning = false;
-    var tileErrors = 0;
+    var features = [];
     var focused = null;
     var hovered = null;
+    var styleReady = false;
+    var loadingBasemap = false;
+    var basemapWarning = '';
+    var contextLost = false;
+    var basemap = controls['map-basemap'] ? controls['map-basemap'].value : 'openfreemap';
+    var styleRequest = null;
+    var styleVersion = 0;
+    var cachedVectorStyle = null;
+    var buildingsLayer = 'review-3d-buildings';
+    var tracksSource = 'review-trajectories';
     var defaultName = names.indexOf('SeA-RVINS (latent)') !== -1 ? 'SeA-RVINS (latent)' :
       names.find(function (name) { return name.indexOf('SeA-RVINS') === 0; });
 
     function updateStatus() {
       var count = entries.filter(function (entry) { return entry.checkbox.checked; }).length;
       status.textContent = count + ' of ' + entries.length + ' tracks visible.' +
-        (tileWarning ? ' Some map tiles are unavailable. Trajectories remain visible.' : '');
+        (contextLost ? ' The graphics context was interrupted; waiting for recovery.' :
+          loadingBasemap ? ' Loading basemap…' : basemapWarning ? ' ' + basemapWarning : '') +
+        (basemap === 'osm' ? ' 3D buildings are available with OpenFreeMap.' : '');
+      container.setAttribute('aria-busy', loadingBasemap || contextLost ? 'true' : 'false');
       controls['fit-visible'].disabled = !entries.some(function (entry) {
-        return entry.checkbox.checked && entry.bounds.isValid();
+        return entry.checkbox.checked && !entry.bounds.isEmpty();
       });
+      if (controls['map-buildings']) controls['map-buildings'].disabled = basemap !== 'openfreemap';
     }
 
     function emphasize() {
+      if (!styleReady) return;
       var active = hovered || focused;
       if (active && !active.checkbox.checked) active = null;
       entries.forEach(function (entry) {
         var opacity = active && active !== entry ? 0.18 : entry.opacity;
-        entry.layer.eachLayer(function (layer) {
-          layer.setStyle({ opacity: opacity, fillOpacity: opacity });
-          if (entry.checkbox.checked) layer.bringToFront();
-        });
+        if (map.getLayer(entry.lineId)) {
+          map.setPaintProperty(entry.lineId, 'line-opacity', opacity);
+          map.setLayoutProperty(entry.lineId, 'visibility', entry.checkbox.checked ? 'visible' : 'none');
+        }
+        if (map.getLayer(entry.pointId)) {
+          map.setPaintProperty(entry.pointId, 'circle-opacity', opacity);
+          map.setPaintProperty(entry.pointId, 'circle-stroke-opacity', opacity);
+          map.setLayoutProperty(entry.pointId, 'visibility', entry.checkbox.checked ? 'visible' : 'none');
+        }
+        // Restore deterministic order after a previous hover or focus.
+        if (map.getLayer(entry.lineId)) map.moveLayer(entry.lineId);
+        if (map.getLayer(entry.pointId)) map.moveLayer(entry.pointId);
       });
-      if (active) active.layer.eachLayer(function (layer) { layer.bringToFront(); });
+      if (active) {
+        if (map.getLayer(active.lineId)) map.moveLayer(active.lineId);
+        if (map.getLayer(active.pointId)) map.moveLayer(active.pointId);
+      }
     }
 
     function addTrack(name, track, reference) {
+      var id = entries.length;
       var color = track.color || (reference ? '#29323d' : '#0072b2');
-      var width = reference ? 4.5 : 2.8;
-      var opacity = reference ? 0.75 : 0.95;
-      var layer = L.featureGroup();
       var points = track.coords.filter(function (point) { return point !== null; });
+      var bounds = new maplibregl.LngLatBounds();
+      points.forEach(function (point) { bounds.extend([point[1], point[0]]); });
       segments(track).forEach(function (segment) {
-        var style = { color: color, weight: width, opacity: opacity, lineJoin: 'round',
-          lineCap: 'round', smoothFactor: 0, interactive: false };
-        if (segment.length === 1) {
-          L.circleMarker(segment[0], { color: color, radius: 2.5, weight: 1,
-            fillColor: color, fillOpacity: opacity, opacity: opacity, interactive: false }).addTo(layer);
-        } else {
-          L.polyline(segment, style).addTo(layer);
-        }
+        // The benchmark stores [latitude, longitude]. Keep full source precision
+        // and only horizontal coordinates: ellipsoid heights are not map altitude.
+        var coordinates = segment.map(function (point) { return [point[1], point[0]]; });
+        features.push({
+          type: 'Feature', properties: { track: id },
+          geometry: coordinates.length === 1 ? { type: 'Point', coordinates: coordinates[0] } :
+            { type: 'LineString', coordinates: coordinates }
+        });
       });
 
       var label = document.createElement('label');
       label.className = 'track-toggle';
       var checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
-      checkbox.id = 'trajectory-toggle-' + entries.length;
+      checkbox.id = 'trajectory-toggle-' + id;
       checkbox.checked = points.length > 0 && (reference || name === defaultName);
       checkbox.disabled = !points.length;
       checkbox.setAttribute('aria-label', name);
@@ -164,16 +218,12 @@
       label.appendChild(text);
       legend.appendChild(label);
 
-      var entry = { name: name, layer: layer, bounds: L.latLngBounds(points),
-        checkbox: checkbox, opacity: opacity, reference: reference };
+      var entry = { name: name, id: id, color: color, width: reference ? 4.5 : 2.8,
+        lineId: 'review-track-' + id, pointId: 'review-track-point-' + id,
+        bounds: bounds, checkbox: checkbox, opacity: reference ? 0.75 : 0.95,
+        reference: reference };
       entries.push(entry);
-      if (checkbox.checked) layer.addTo(map);
-      checkbox.addEventListener('change', function () {
-        if (checkbox.checked) layer.addTo(map);
-        else map.removeLayer(layer);
-        emphasize();
-        updateStatus();
-      });
+      checkbox.addEventListener('change', function () { emphasize(); updateStatus(); });
       label.addEventListener('mouseenter', function () { hovered = entry; emphasize(); });
       label.addEventListener('mouseleave', function () { hovered = null; emphasize(); });
       checkbox.addEventListener('focus', function () { focused = entry; emphasize(); });
@@ -183,14 +233,152 @@
     legend.textContent = '';
     addTrack('Ground truth', data.gt, true);
     names.forEach(function (name) { addTrack(name, data.methods[name], false); });
+    var trajectoryData = { type: 'FeatureCollection', features: features };
+
+    container.replaceChildren();
+    var center = data.center || [0, 0];
+    var mapOptions = {
+      container: container, style: blankStyle(), center: [center[1], center[0]],
+      zoom: 2, pitch: 50, bearing: 0, maxPitch: 70, maxZoom: 20,
+      scrollZoom: true, cooperativeGestures: false,
+      touchZoomRotate: true, touchPitch: true, dragRotate: true,
+      renderWorldCopies: false, attributionControl: false,
+      canvasContextAttributes: { antialias: true },
+      // OSM requires a valid Referer. Retain the site origin without page paths.
+      transformRequest: function (url) {
+        return { url: url, referrerPolicy: 'strict-origin-when-cross-origin' };
+      }
+    };
+    if (!entries[0].bounds.isEmpty()) {
+      mapOptions.bounds = entries[0].bounds;
+      mapOptions.fitBoundsOptions = { padding: 42, maxZoom: 18 };
+    }
+    map = new maplibregl.Map(mapOptions);
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+    map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+    map.getCanvas().setAttribute('aria-label', 'Interactive trajectories. Use arrow keys to pan, plus and minus to zoom, or the heading and tilt controls.');
+
+    function updateBuildings() {
+      var enabled = basemap === 'openfreemap' &&
+        (!controls['map-buildings'] || controls['map-buildings'].checked);
+      if (map.getLayer(buildingsLayer)) {
+        map.setLayoutProperty(buildingsLayer, 'visibility', enabled ? 'visible' : 'none');
+      }
+      // Bright's offset roof fill simulates depth in 2D; restore it when the
+      // independent extrusion switch is off, avoiding double roofs in 3D.
+      if (map.getLayer('building-top')) {
+        map.setLayoutProperty('building-top', 'visibility', enabled ? 'none' : 'visible');
+      }
+      updateStatus();
+    }
+
+    function installLayers() {
+      styleReady = true;
+      var style = map.getStyle();
+      var building = style.layers.find(function (layer) {
+        return layer['source-layer'] === 'building' && style.sources[layer.source] &&
+          style.sources[layer.source].type === 'vector';
+      });
+      if (basemap === 'openfreemap' && building && !map.getLayer(buildingsLayer)) {
+        var firstLabel = style.layers.find(function (layer) { return layer.type === 'symbol'; });
+        map.addLayer({
+          id: buildingsLayer, type: 'fill-extrusion', source: building.source,
+          'source-layer': building['source-layer'], minzoom: 13,
+          filter: ['!=', ['get', 'hide_3d'], true],
+          paint: {
+            'fill-extrusion-color': '#aab9b3',
+            'fill-extrusion-height': ['max', 0, ['to-number', ['get', 'render_height'], 0]],
+            'fill-extrusion-base': ['max', 0, ['to-number', ['get', 'render_min_height'], 0]],
+            'fill-extrusion-opacity': 0.68
+          }
+        }, firstLabel && firstLabel.id);
+      }
+      if (!map.getSource(tracksSource)) {
+        map.addSource(tracksSource, {
+          type: 'geojson', data: trajectoryData, tolerance: 0, maxzoom: 22
+        });
+      }
+      entries.forEach(function (entry) {
+        if (!map.getLayer(entry.lineId)) map.addLayer({
+          id: entry.lineId, source: tracksSource, type: 'line',
+          filter: ['all', ['==', ['get', 'track'], entry.id], ['==', ['geometry-type'], 'LineString']],
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': entry.color, 'line-width': entry.width, 'line-opacity': entry.opacity }
+        });
+        if (!map.getLayer(entry.pointId)) map.addLayer({
+          id: entry.pointId, source: tracksSource, type: 'circle',
+          filter: ['all', ['==', ['get', 'track'], entry.id], ['==', ['geometry-type'], 'Point']],
+          paint: { 'circle-color': entry.color, 'circle-radius': 2.5,
+            'circle-stroke-color': entry.color, 'circle-stroke-width': 1,
+            'circle-opacity': entry.opacity, 'circle-stroke-opacity': entry.opacity }
+        });
+      });
+      updateBuildings();
+      emphasize();
+    }
+    map.on('style.load', installLayers);
+    map.on('error', function (event) {
+      basemapWarning = 'Some map content could not load. Trajectories remain available; try another basemap or reload.';
+      updateStatus();
+      console.warn('Trajectory map:', event.error && event.error.message || 'Map resource unavailable.');
+    });
+    map.on('webglcontextlost', function () { contextLost = true; updateStatus(); });
+    map.on('webglcontextrestored', function () { contextLost = false; updateStatus(); });
+
+    function setBasemap(next) {
+      basemap = next;
+      var version = ++styleVersion;
+      if (styleRequest) styleRequest.abort();
+      basemapWarning = '';
+      loadingBasemap = next === 'openfreemap';
+      styleReady = false;
+      // Replacing the style removes the old sources. Hidden basemaps do not
+      // continue downloading tiles. Track selections and camera are preserved.
+      map.setStyle(next === 'osm' ? osmStyle() : blankStyle(), { diff: false });
+      updateStatus();
+      if (next === 'osm') return;
+      function applyVectorStyle(style) {
+        if (version !== styleVersion) return;
+        loadingBasemap = false;
+        styleReady = false;
+        map.setStyle(style, { diff: false });
+        updateStatus();
+      }
+      if (cachedVectorStyle) {
+        applyVectorStyle(cachedVectorStyle);
+        return;
+      }
+      styleRequest = new AbortController();
+      fetch('https://tiles.openfreemap.org/styles/bright', {
+        signal: styleRequest.signal, referrerPolicy: 'strict-origin-when-cross-origin'
+      }).then(function (response) {
+        if (!response.ok) throw new Error('Basemap request returned HTTP ' + response.status + '.');
+        return response.json();
+      }).then(function (style) {
+        if (!style || style.version !== 8 || !style.sources || !Array.isArray(style.layers)) {
+          throw new Error('The basemap style has an invalid format.');
+        }
+        cachedVectorStyle = style;
+        applyVectorStyle(style);
+      }).catch(function (error) {
+        if (error.name === 'AbortError' || version !== styleVersion) return;
+        loadingBasemap = false;
+        basemapWarning = 'OpenFreeMap is unavailable. Trajectories remain visible; choose OSM streets or reload.';
+        updateStatus();
+        console.warn('Trajectory basemap:', error.message);
+      });
+    }
 
     function fit(bounds) {
-      if (bounds.isValid()) map.fitBounds(bounds, { padding: [28, 28], maxZoom: 18 });
+      if (!bounds.isEmpty()) map.fitBounds(bounds, {
+        padding: 42, maxZoom: 18, bearing: map.getBearing(), pitch: map.getPitch(), duration: 500
+      });
     }
     function fitVisible() {
-      var bounds = L.latLngBounds([]);
+      var bounds = new maplibregl.LngLatBounds();
       entries.forEach(function (entry) {
-        if (entry.checkbox.checked && entry.bounds.isValid()) bounds.extend(entry.bounds);
+        if (entry.checkbox.checked && !entry.bounds.isEmpty()) bounds.extend(entry.bounds);
       });
       fit(bounds);
     }
@@ -198,35 +386,52 @@
       entries.forEach(function (entry) {
         entry.checkbox.checked = !entry.checkbox.disabled &&
           (all || entry.reference || entry.name === defaultName);
-        if (entry.checkbox.checked) entry.layer.addTo(map);
-        else map.removeLayer(entry.layer);
       });
       emphasize();
       updateStatus();
     }
-
+    function syncCamera() {
+      var bearing = Math.round((map.getBearing() % 360 + 360) % 360) % 360;
+      var pitch = Math.round(map.getPitch());
+      if (controls['map-bearing']) controls['map-bearing'].value = String(bearing);
+      if (controls['map-pitch']) controls['map-pitch'].value = String(pitch);
+      var bearingValue = document.getElementById('map-bearing-value');
+      var pitchValue = document.getElementById('map-pitch-value');
+      if (bearingValue) bearingValue.textContent = bearing + '°';
+      if (pitchValue) pitchValue.textContent = pitch + '°';
+      if (controls['map-bearing']) controls['map-bearing'].setAttribute('aria-valuetext', bearing + ' degrees');
+      if (controls['map-pitch']) controls['map-pitch'].setAttribute('aria-valuetext', pitch + ' degrees');
+      if (controls['map-view-2d']) controls['map-view-2d'].setAttribute('aria-pressed', map.getPitch() < 1 ? 'true' : 'false');
+      if (controls['map-view-3d']) controls['map-view-3d'].setAttribute('aria-pressed', map.getPitch() >= 1 ? 'true' : 'false');
+    }
+    map.on('rotate', syncCamera);
+    map.on('pitch', syncCamera);
     controls['fit-reference'].addEventListener('click', function () { fit(entries[0].bounds); });
     controls['fit-visible'].addEventListener('click', fitVisible);
     controls['show-all-tracks'].addEventListener('click', function () { select(true); });
     controls['show-default-tracks'].addEventListener('click', function () { select(false); });
+    if (controls['map-basemap']) controls['map-basemap'].addEventListener('change', function () {
+      setBasemap(controls['map-basemap'].value);
+    });
+    if (controls['map-buildings']) controls['map-buildings'].addEventListener('change', updateBuildings);
+    if (controls['map-view-2d']) controls['map-view-2d'].addEventListener('click', function () {
+      map.easeTo({ pitch: 0, duration: 450 });
+    });
+    if (controls['map-view-3d']) controls['map-view-3d'].addEventListener('click', function () {
+      map.easeTo({ pitch: 50, duration: 450 });
+    });
+    if (controls['map-bearing']) controls['map-bearing'].addEventListener('input', function () {
+      map.stop();
+      map.setBearing(Number(controls['map-bearing'].value));
+    });
+    if (controls['map-pitch']) controls['map-pitch'].addEventListener('input', function () {
+      map.stop();
+      map.setPitch(Number(controls['map-pitch'].value));
+    });
     Object.keys(controls).forEach(function (key) { controls[key].disabled = false; });
-    controls['fit-reference'].disabled = !entries[0].bounds.isValid();
-
-    // Starting with the reference extent keeps the route readable. Fit visible
-    // tracks includes every selected coordinate, including distant estimates.
-    if (entries[0].bounds.isValid()) fit(entries[0].bounds);
-    else if (entries.some(function (entry) { return entry.checkbox.checked && entry.bounds.isValid(); })) fitVisible();
-    else map.setView(data.center || [0, 0], 2);
-
-    // OSM requires a valid Referer; send the site origin without the page path.
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      referrerPolicy: 'strict-origin-when-cross-origin',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).on('loading', function () { tileErrors = 0; })
-      .on('tileerror', function () { tileErrors += 1; tileWarning = true; updateStatus(); })
-      .on('load', function () { tileWarning = tileErrors > 0; updateStatus(); })
-      .addTo(map);
+    controls['fit-reference'].disabled = entries[0].bounds.isEmpty();
+    syncCamera();
+    setBasemap(basemap);
 
     var summary = document.getElementById('map-summary');
     if (summary) {
@@ -234,20 +439,24 @@
       summary.textContent = names.length + ' methods + ground truth · ' +
         epochs.toLocaleString() + ' scoring epochs';
     }
-    container.setAttribute('aria-busy', 'false');
+    // A responsive layout may change the canvas dimensions without a window resize.
+    if (window.ResizeObserver) new ResizeObserver(function () { map.resize(); }).observe(container);
     updateStatus();
   }
 
   function showError(error) {
     container.setAttribute('aria-busy', 'false');
     Object.keys(controls).forEach(function (key) { controls[key].disabled = true; });
+    legend.querySelectorAll('input').forEach(function (input) { input.disabled = true; });
     status.textContent = 'Interactive trajectories unavailable.';
     var message = document.createElement('div');
     message.className = 'map-error';
     var paragraph = document.createElement('p');
     paragraph.textContent = window.location.protocol === 'file:' ?
       'Open this page through a local web server to load the trajectory data. See the project README for instructions.' :
-      'The interactive map could not be loaded. Please reload the page to try again.';
+      /WebGL|graphics|context/i.test(error.message) ?
+        'This interactive map needs WebGL. Enable graphics acceleration or try another browser.' :
+        'The interactive map could not be loaded. Please reload the page to try again.';
     var download = document.createElement('a');
     download.href = 'data/trajectories.json';
     download.textContent = 'Open trajectory data';

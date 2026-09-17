@@ -8,7 +8,7 @@
   <title>SeA-RVINS: Semantic-Aware Tightly Coupled RTK-Visual-Inertial System with Correlation-Preserving Robust Estimation for Urban Navigation</title>
   <meta name="description" content="Anonymous review supplement for SeA-RVINS: system architecture, semantic-aware stereo frontend, TEX-CUP benchmark results, and interactive trajectories.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23146b50'/%3E%3Cpath d='M8 22 14 10l5 9 5-13' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="vendor/maplibre-gl.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -137,8 +137,34 @@
       <p class="lead">Inspect the saved antenna-position estimates over the evaluated route. Toggle methods to compare tracks; gaps indicate unavailable solutions. Ground truth and SeA-RVINS (latent) are shown initially.</p>
       <div class="maprow">
         <div class="map-panel">
+          <div class="map-view-controls" aria-label="Map appearance and camera">
+            <div class="map-view-topline">
+              <label class="basemap-select" for="map-basemap">Map
+                <select id="map-basemap" disabled>
+                  <option value="openfreemap">OpenFreeMap · OSM 3D</option>
+                  <option value="osm">OSM streets</option>
+                </select>
+              </label>
+              <div class="view-buttons" role="group" aria-label="Camera view">
+                <button id="map-view-2d" type="button" aria-pressed="false" disabled>2D</button>
+                <button id="map-view-3d" type="button" aria-pressed="true" disabled>3D</button>
+              </div>
+              <label class="buildings-toggle" for="map-buildings"><input id="map-buildings" type="checkbox" checked disabled>3D buildings</label>
+            </div>
+            <div class="camera-sliders">
+              <div class="camera-slider">
+                <label for="map-bearing">Heading <output id="map-bearing-value" for="map-bearing">0°</output></label>
+                <input id="map-bearing" type="range" min="0" max="359" step="1" value="0" disabled>
+              </div>
+              <div class="camera-slider">
+                <label for="map-pitch">Tilt <output id="map-pitch-value" for="map-pitch">50°</output></label>
+                <input id="map-pitch" type="range" min="0" max="70" step="1" value="50" disabled>
+              </div>
+            </div>
+          </div>
           <div id="map" role="region" aria-label="Interactive trajectory comparison map"><p class="map-error">Loading trajectories…</p></div>
           <p id="map-status" class="map-status" role="status" aria-live="polite"></p>
+          <p class="map-gesture-help">Two-finger scroll or pinch to zoom. Drag to pan; right-drag to rotate and tilt, or use the sliders above.</p>
         </div>
         <aside class="legend" aria-label="Trajectory controls">
           <h3>Compare methods</h3>
@@ -148,6 +174,7 @@
           <p class="note">Full evaluation window · 1-second samples. All finite outliers within each method’s reporting interval are retained.</p>
         </aside>
       </div>
+      <p class="caption">OpenFreeMap streams OSM buildings as you navigate. Building heights provide visual context; trajectories show horizontal positions on the map, without estimated altitude.</p>
     </div>
   </section>
 
@@ -166,7 +193,7 @@
   </section>
 </main>
 <footer><div class="wrap"><span>SeA-RVINS · Anonymous review supplement</span><a href="#top">Back to top ↑</a></div></footer>
-<script src="vendor/leaflet.js"></script>
+<script src="vendor/maplibre-gl.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
