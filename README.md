@@ -1,8 +1,10 @@
-# SeA-RVINS review supplement
+# SeA-RVINS introduction webpage
 
-Anonymous companion website for **SeA-RVINS: Semantic-Aware Tightly Coupled
+This repository hosts the introduction page for **SeA-RVINS: Semantic-Aware Tightly Coupled
 RTK-Visual-Inertial System with Correlation-Preserving Robust Estimation for
 Urban Navigation**.
+
+**Website:** [https://semantic-rvins.github.io/](https://semantic-rvins.github.io/)
 
 The static site is in [`project-webpage/`](project-webpage/). It includes the
 system and visual frontend figures, manuscript benchmark results, and an
