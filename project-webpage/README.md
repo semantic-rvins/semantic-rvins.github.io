@@ -1,4 +1,4 @@
-# SeA-RVINS anonymous review supplement
+# SeA-RVINS project webpage
 
 Static companion page for **SeA-RVINS: Semantic-Aware Tightly Coupled
 RTK-Visual-Inertial System with Correlation-Preserving Robust Estimation for

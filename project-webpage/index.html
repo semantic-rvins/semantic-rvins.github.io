@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>SeA-RVINS: Semantic-Aware Tightly Coupled RTK-Visual-Inertial System with Correlation-Preserving Robust Estimation for Urban Navigation</title>
-  <meta name="description" content="Anonymous review supplement for SeA-RVINS: system architecture, semantic-aware stereo frontend, TEX-CUP benchmark results, and interactive trajectories.">
+  <meta name="description" content="SeA-RVINS: interactive trajectories, TEX-CUP benchmark results, system architecture, and semantic-aware stereo frontend.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23146b50'/%3E%3Cpath d='M8 22 14 10l5 9 5-13' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/maplibre-gl.css">
   <link rel="stylesheet" href="style.css">
@@ -17,16 +17,15 @@
   <div class="wrap">
     <a class="brand" href="#top">SeA<span>-</span>RVINS</a>
     <nav aria-label="Page sections">
-      <a href="#method">System</a>
-      <a href="#benchmark">Benchmark</a>
-      <a href="#trajectories">Trajectories</a>
       <a href="#video">3D visualization</a>
+      <a href="#trajectories">Trajectories</a>
+      <a href="#benchmark">Benchmark</a>
+      <a href="#method">System</a>
     </nav>
   </div>
 </div>
 <header class="hero" id="top">
   <div class="wrap">
-    <span class="review-label">Anonymous review supplement</span>
     <h1>SeA-RVINS: Semantic-Aware Tightly Coupled RTK-Visual-Inertial System with Correlation-Preserving Robust Estimation for Urban Navigation</h1>
     <p class="hero-summary">Reliable urban pose estimation through semantic-aware visual tracking, correlation-preserving GNSS robust estimation, and verified ambiguity continuity.</p>
     <div class="btns">
@@ -64,20 +63,64 @@
     </div>
   </section>
 
-  <section id="method">
+  <section id="video" class="section-soft">
+    <div class="wrap coming-soon">
+      <div>
+        <span class="review-label">Coming soon</span>
+        <h2>Navigation in 3D, frame by frame</h2>
+        <p>A synchronized video will show the SeA-RVINS pose moving through a 3D map alongside the corresponding visual feature tracks.</p>
+      </div>
+      <div class="video-placeholder" role="img" aria-label="Placeholder for the upcoming 3D map and feature tracking video">
+        <svg width="76" height="76" viewBox="0 0 76 76" fill="none" aria-hidden="true"><rect x="1" y="1" width="74" height="74" rx="20" fill="#eff5f1" stroke="#b7cdbf"/><path d="M30 24L51 38L30 52V24Z" stroke="#668572" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <span>3D pose + feature tracking</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="trajectories">
     <div class="wrap">
-      <div class="section-heading"><span class="section-number" aria-hidden="true">02</span><h2>System architecture</h2></div>
-      <p class="lead">GNSS, IMU, and stereo observations enter a 6-second fixed-lag factor graph. Integer ambiguity hypotheses are validated before accepted fixes are applied.</p>
-      <figure class="fig">
-        <div class="figure-frame"><a href="assets/system_diagram.png" target="_blank" rel="noopener" aria-label="Open system architecture figure at full resolution"><img width="3485" height="1425" src="assets/system_diagram.png" alt="SeA-RVINS architecture: GNSS preprocessing, inertial preintegration, and semantic-aware vision feed a factor graph with persistent landmarks, ambiguity continuation, and validated integer ambiguity resolution."></a></div>
-        <figcaption class="caption"><strong>System overview.</strong> The graph jointly estimates navigation states, landmarks, and float ambiguities, with optional pivot-error and stationary-anchor variables. Validated integer priors feed back into the graph. Select either figure to inspect it at full resolution.</figcaption>
-      </figure>
-      <h3 class="figure-subheading">Semantic-aware learned stereo frontend</h3>
-      <p class="lead">Semantic masking, learned feature matching, and geometric checks screen stereo and temporal tracks before landmark admission.</p>
-      <figure class="fig">
-        <div class="figure-frame"><a href="assets/vision_frontend.png" target="_blank" rel="noopener" aria-label="Open stereo frontend figure at full resolution"><img width="2060" height="900" src="assets/vision_frontend.png" alt="Semantic-aware stereo frontend showing semantic masks, learned feature extraction and matching, and geometric screening before visual factors are added." loading="lazy"></a></div>
-        <figcaption class="caption"><strong>Visual measurement admission.</strong> SegFormer semantic masks, SuperPoint features, and LightGlue matching are combined with stereo, temporal, and frame-level geometric checks to reduce unreliable visual constraints.</figcaption>
-      </figure>
+      <div class="section-heading"><span class="section-number" aria-hidden="true">02</span><h2>Interactive trajectories</h2></div>
+      <p class="lead">Inspect the saved antenna-position estimates over the evaluated route. Toggle methods to compare tracks; gaps indicate unavailable solutions. Ground truth and SeA-RVINS (latent) are shown initially.</p>
+      <div class="maprow">
+        <div class="map-panel">
+          <div class="map-view-controls" aria-label="Map appearance and camera">
+            <div class="map-view-topline">
+              <label class="basemap-select" for="map-basemap">Map
+                <select id="map-basemap" disabled>
+                  <option value="openfreemap">OpenFreeMap · OSM 3D</option>
+                  <option value="osm">OSM streets</option>
+                </select>
+              </label>
+              <div class="view-buttons" role="group" aria-label="Camera view">
+                <button id="map-view-2d" type="button" aria-pressed="false" disabled>2D</button>
+                <button id="map-view-3d" type="button" aria-pressed="true" disabled>3D</button>
+              </div>
+              <label class="buildings-toggle" for="map-buildings"><input id="map-buildings" type="checkbox" checked disabled>3D buildings</label>
+            </div>
+            <div class="camera-sliders">
+              <div class="camera-slider">
+                <label for="map-bearing">Heading <output id="map-bearing-value" for="map-bearing">0°</output></label>
+                <input id="map-bearing" type="range" min="0" max="359" step="1" value="0" disabled>
+              </div>
+              <div class="camera-slider">
+                <label for="map-pitch">Tilt <output id="map-pitch-value" for="map-pitch">50°</output></label>
+                <input id="map-pitch" type="range" min="0" max="70" step="1" value="50" disabled>
+              </div>
+            </div>
+          </div>
+          <div id="map" role="region" aria-label="Interactive trajectory comparison map"><p class="map-error">Loading trajectories…</p></div>
+          <p id="map-status" class="map-status" role="status" aria-live="polite"></p>
+          <p class="map-gesture-help">Two-finger scroll or pinch to zoom. Drag to pan; right-drag to rotate and tilt, or use the sliders above.</p>
+        </div>
+        <aside class="legend" aria-label="Trajectory controls">
+          <h3>Compare methods</h3>
+          <p class="note">Select a track. Hover or focus its label to emphasize it.</p>
+          <div class="map-controls" id="map-controls"></div>
+          <div id="legend-items"></div>
+          <p class="note">Full evaluation window · 1-second samples. All finite outliers within each method’s reporting interval are retained.</p>
+        </aside>
+      </div>
+      <p class="caption">OpenFreeMap streams OSM buildings as you navigate. Building heights provide visual context; trajectories show horizontal positions on the map, without estimated altitude.</p>
     </div>
   </section>
 
@@ -131,68 +174,24 @@
     </div>
   </section>
 
-  <section id="trajectories">
+  <section id="method">
     <div class="wrap">
-      <div class="section-heading"><span class="section-number" aria-hidden="true">04</span><h2>Interactive trajectories</h2></div>
-      <p class="lead">Inspect the saved antenna-position estimates over the evaluated route. Toggle methods to compare tracks; gaps indicate unavailable solutions. Ground truth and SeA-RVINS (latent) are shown initially.</p>
-      <div class="maprow">
-        <div class="map-panel">
-          <div class="map-view-controls" aria-label="Map appearance and camera">
-            <div class="map-view-topline">
-              <label class="basemap-select" for="map-basemap">Map
-                <select id="map-basemap" disabled>
-                  <option value="openfreemap">OpenFreeMap · OSM 3D</option>
-                  <option value="osm">OSM streets</option>
-                </select>
-              </label>
-              <div class="view-buttons" role="group" aria-label="Camera view">
-                <button id="map-view-2d" type="button" aria-pressed="false" disabled>2D</button>
-                <button id="map-view-3d" type="button" aria-pressed="true" disabled>3D</button>
-              </div>
-              <label class="buildings-toggle" for="map-buildings"><input id="map-buildings" type="checkbox" checked disabled>3D buildings</label>
-            </div>
-            <div class="camera-sliders">
-              <div class="camera-slider">
-                <label for="map-bearing">Heading <output id="map-bearing-value" for="map-bearing">0°</output></label>
-                <input id="map-bearing" type="range" min="0" max="359" step="1" value="0" disabled>
-              </div>
-              <div class="camera-slider">
-                <label for="map-pitch">Tilt <output id="map-pitch-value" for="map-pitch">50°</output></label>
-                <input id="map-pitch" type="range" min="0" max="70" step="1" value="50" disabled>
-              </div>
-            </div>
-          </div>
-          <div id="map" role="region" aria-label="Interactive trajectory comparison map"><p class="map-error">Loading trajectories…</p></div>
-          <p id="map-status" class="map-status" role="status" aria-live="polite"></p>
-          <p class="map-gesture-help">Two-finger scroll or pinch to zoom. Drag to pan; right-drag to rotate and tilt, or use the sliders above.</p>
-        </div>
-        <aside class="legend" aria-label="Trajectory controls">
-          <h3>Compare methods</h3>
-          <p class="note">Select a track. Hover or focus its label to emphasize it.</p>
-          <div class="map-controls" id="map-controls"></div>
-          <div id="legend-items"></div>
-          <p class="note">Full evaluation window · 1-second samples. All finite outliers within each method’s reporting interval are retained.</p>
-        </aside>
-      </div>
-      <p class="caption">OpenFreeMap streams OSM buildings as you navigate. Building heights provide visual context; trajectories show horizontal positions on the map, without estimated altitude.</p>
-    </div>
-  </section>
-
-  <section id="video" class="section-soft">
-    <div class="wrap coming-soon">
-      <div>
-        <span class="review-label">Coming soon</span>
-        <h2>Navigation in 3D, frame by frame</h2>
-        <p>A synchronized video will show the SeA-RVINS pose moving through a 3D map alongside the corresponding visual feature tracks.</p>
-      </div>
-      <div class="video-placeholder" role="img" aria-label="Placeholder for the upcoming 3D map and feature tracking video">
-        <svg width="76" height="76" viewBox="0 0 76 76" fill="none" aria-hidden="true"><rect x="1" y="1" width="74" height="74" rx="20" fill="#eff5f1" stroke="#b7cdbf"/><path d="M30 24L51 38L30 52V24Z" stroke="#668572" stroke-width="1.5" stroke-linejoin="round"/></svg>
-        <span>3D pose + feature tracking</span>
-      </div>
+      <div class="section-heading"><span class="section-number" aria-hidden="true">04</span><h2>System architecture</h2></div>
+      <p class="lead">GNSS, IMU, and stereo observations enter a 6-second fixed-lag factor graph. Integer ambiguity hypotheses are validated before accepted fixes are applied.</p>
+      <figure class="fig">
+        <div class="figure-frame"><a href="assets/system_diagram.png" target="_blank" rel="noopener" aria-label="Open system architecture figure at full resolution"><img width="3485" height="1425" src="assets/system_diagram.png" alt="SeA-RVINS architecture: GNSS preprocessing, inertial preintegration, and semantic-aware vision feed a factor graph with persistent landmarks, ambiguity continuation, and validated integer ambiguity resolution."></a></div>
+        <figcaption class="caption"><strong>System overview.</strong> The graph jointly estimates navigation states, landmarks, and float ambiguities, with optional pivot-error and stationary-anchor variables. Validated integer priors feed back into the graph. Select either figure to inspect it at full resolution.</figcaption>
+      </figure>
+      <h3 class="figure-subheading">Semantic-aware learned stereo frontend</h3>
+      <p class="lead">Semantic masking, learned feature matching, and geometric checks screen stereo and temporal tracks before landmark admission.</p>
+      <figure class="fig">
+        <div class="figure-frame"><a href="assets/vision_frontend.png" target="_blank" rel="noopener" aria-label="Open stereo frontend figure at full resolution"><img width="2060" height="900" src="assets/vision_frontend.png" alt="Semantic-aware stereo frontend showing semantic masks, learned feature extraction and matching, and geometric screening before visual factors are added." loading="lazy"></a></div>
+        <figcaption class="caption"><strong>Visual measurement admission.</strong> SegFormer semantic masks, SuperPoint features, and LightGlue matching are combined with stereo, temporal, and frame-level geometric checks to reduce unreliable visual constraints.</figcaption>
+      </figure>
     </div>
   </section>
 </main>
-<footer><div class="wrap"><span>SeA-RVINS · Anonymous review supplement</span><a href="#top">Back to top ↑</a></div></footer>
+<footer><div class="wrap"><span>SeA-RVINS</span><a href="#top">Back to top ↑</a></div></footer>
 <script src="vendor/maplibre-gl.js"></script>
 <script src="app.js"></script>
 </body>
