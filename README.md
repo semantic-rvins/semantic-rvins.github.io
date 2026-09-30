@@ -7,8 +7,8 @@ Urban Navigation**.
 **Website:** [https://semantic-rvins.github.io/](https://semantic-rvins.github.io/)
 
 The static site is in [`project-webpage/`](project-webpage/). It includes the
-system and visual frontend figures, manuscript benchmark results, and an
-interactive trajectory viewer.
+system and visual frontend figures, manuscript benchmark results, an interactive
+trajectory viewer, and a looping SeA-RVINS (Scalar) demo video.
 
 Preview from the repository root:
 

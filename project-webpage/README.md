@@ -5,10 +5,11 @@ RTK-Visual-Inertial System with Correlation-Preserving Robust Estimation for
 Urban Navigation**.
 
 The page contains the system architecture, learned stereo frontend, horizontal
-results from manuscript Table I, the IAR summary from Table II, and interactive
-antenna trajectories. Author information, publication links, and identifying
-repository links are intentionally absent. Benchmark setup and reproduction
-instructions, two remaining baseline trajectories, and the 3D video are pending.
+results from manuscript Table I, the IAR summary from Table II, interactive
+antenna trajectories, and a SeA-RVINS (Scalar) demo video. Author information,
+publication links, and identifying repository links are intentionally absent.
+Benchmark setup and reproduction instructions and two remaining baseline
+trajectories are pending.
 
 ## Preview
 
@@ -29,6 +30,25 @@ referrer policy set to `strict-origin-when-cross-origin`, which sends only the
 site origin to the tile server, and use the canonical
 `https://tile.openstreetmap.org/{z}/{x}/{y}.png` endpoint. Do not suppress the
 Referer header when anonymizing the page. Browser caching remains enabled.
+
+## Demo video
+
+The 30-second SeA-RVINS (Scalar) demo is embedded from `data/demo.mp4` with
+muted autoplay, native playback controls, inline playback on mobile, and automatic
+looping. It shows semantic masking and visual feature tracking alongside the
+estimated pose and trajectory in a 3D map. The player preserves the original
+1024 × 732 aspect ratio and uses automatic preloading for playback on page load.
+If a browser blocks autoplay, the native controls let visitors start playback.
+The visualized car is overlaid on the map's ground surface.
+
+The demo is stored with Git LFS. After cloning, retrieve the video before previewing:
+
+```sh
+git lfs install --local
+git lfs pull
+```
+
+The Pages workflow downloads LFS content before packaging the website.
 
 ## Map controls
 
@@ -52,6 +72,7 @@ OpenFreeMap/OpenMapTiles/OSM attribution remains visible in the map.
 - `app.js`: MapLibre viewer, building/camera controls, and trajectory comparison.
 - `assets/system_diagram.png`: latest corrected system architecture.
 - `assets/vision_frontend.png`: current manuscript stereo frontend figure.
+- `data/demo.mp4`: SeA-RVINS (Scalar) navigation demo (H.264 MP4).
 - `data/trajectories.json`: ground truth plus the nine available final method tracks.
 - `gen_web_data.py`: portable trajectory export from the final benchmark directory.
 - `vendor/maplibre-gl.js`, `vendor/maplibre-gl.css`, `vendor/maplibre-LICENSE.txt`:

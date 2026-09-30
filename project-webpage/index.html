@@ -17,7 +17,7 @@
   <div class="wrap">
     <a class="brand" href="#top">SeA<span>-</span>RVINS</a>
     <nav aria-label="Page sections">
-      <a href="#video">3D visualization</a>
+      <a href="#video">Video demo</a>
       <a href="#trajectories">Trajectories</a>
       <a href="#benchmark">Benchmark</a>
       <a href="#method">System</a>
@@ -29,8 +29,9 @@
     <h1>SeA-RVINS: Semantic-Aware Tightly Coupled RTK-Visual-Inertial System with Correlation-Preserving Robust Estimation for Urban Navigation</h1>
     <p class="hero-summary">Reliable urban pose estimation through semantic-aware visual tracking, correlation-preserving GNSS robust estimation, and verified ambiguity continuity.</p>
     <div class="btns">
-      <a class="btn" href="#benchmark">Benchmark <span aria-hidden="true">↗</span></a>
+      <a class="btn ghost" href="#video">Video demo <span aria-hidden="true">↗</span></a>
       <a class="btn ghost" href="#trajectories">Interactive trajectories <span aria-hidden="true">↗</span></a>
+      <a class="btn" href="#benchmark">Benchmark <span aria-hidden="true">↗</span></a>
     </div>
     <p class="hero-note">Supplementary figures and results for the submitted manuscript.</p>
   </div>
@@ -63,17 +64,20 @@
     </div>
   </section>
 
-  <section id="video" class="section-soft">
-    <div class="wrap coming-soon">
-      <div>
-        <span class="review-label">Coming soon</span>
-        <h2>Navigation in 3D, frame by frame</h2>
-        <p>A synchronized video will show the SeA-RVINS pose moving through a 3D map alongside the corresponding visual feature tracks.</p>
+  <section id="video" class="section-soft" aria-labelledby="video-heading">
+    <div class="wrap">
+      <div class="video-intro">
+        <span class="review-label">SeA-RVINS (Scalar)</span>
+        <h2 id="video-heading">Tracking and Localization in a 3D Map</h2>
+        <p class="lead">Demo results from SeA-RVINS (Scalar), showing semantic masking and visual feature tracking alongside the estimated pose and trajectory in a 3D map.</p>
       </div>
-      <div class="video-placeholder" role="img" aria-label="Placeholder for the upcoming 3D map and feature tracking video">
-        <svg width="76" height="76" viewBox="0 0 76 76" fill="none" aria-hidden="true"><rect x="1" y="1" width="74" height="74" rx="20" fill="#eff5f1" stroke="#b7cdbf"/><path d="M30 24L51 38L30 52V24Z" stroke="#668572" stroke-width="1.5" stroke-linejoin="round"/></svg>
-        <span>3D pose + feature tracking</span>
-      </div>
+      <figure class="video-demo">
+        <video autoplay muted controls loop playsinline preload="auto" width="1024" height="732" aria-label="SeA-RVINS (Scalar) navigation demo" aria-describedby="video-caption">
+          <source src="data/demo.mp4" type="video/mp4">
+          Your browser does not support embedded video. <a href="data/demo.mp4">Open the SeA-RVINS (Scalar) demo video</a>.
+        </video>
+        <figcaption id="video-caption" class="caption"><strong>SeA-RVINS (Scalar).</strong> Synchronized visual tracking and 3D pose visualization. The visualized car is overlaid on the map's ground surface. The 30-second demo plays automatically and loops. <a href="data/demo.mp4">Open video</a>.</figcaption>
+      </figure>
     </div>
   </section>
 
