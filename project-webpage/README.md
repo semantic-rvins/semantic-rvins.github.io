@@ -6,7 +6,7 @@ Urban Navigation**.
 
 The page contains the system architecture, learned stereo frontend, horizontal
 results from manuscript Table I, the IAR summary from Table II, interactive
-antenna trajectories, and a SeA-RVINS (Scalar) demo video. Author information,
+antenna trajectories, and a SeA-RVINS visualization video. Author information,
 publication links, and identifying repository links are intentionally absent.
 Benchmark setup and reproduction instructions and two remaining baseline
 trajectories are pending.
@@ -31,9 +31,9 @@ site origin to the tile server, and use the canonical
 `https://tile.openstreetmap.org/{z}/{x}/{y}.png` endpoint. Do not suppress the
 Referer header when anonymizing the page. Browser caching remains enabled.
 
-## Demo video
+## Visualization Example
 
-The 30-second SeA-RVINS (Scalar) demo is embedded from `data/demo.mp4` with
+The 30-second SeA-RVINS visualization is embedded from `data/demo.mp4` with
 muted autoplay, native playback controls, inline playback on mobile, and automatic
 looping. It shows semantic masking and visual feature tracking alongside the
 estimated pose and trajectory in a 3D map. The player preserves the original
@@ -41,7 +41,7 @@ estimated pose and trajectory in a 3D map. The player preserves the original
 If a browser blocks autoplay, the native controls let visitors start playback.
 The visualized car is overlaid on the map's ground surface.
 
-The demo is stored with Git LFS. After cloning, retrieve the video before previewing:
+The video is stored with Git LFS. After cloning, retrieve the video before previewing:
 
 ```sh
 git lfs install --local
@@ -72,7 +72,7 @@ OpenFreeMap/OpenMapTiles/OSM attribution remains visible in the map.
 - `app.js`: MapLibre viewer, building/camera controls, and trajectory comparison.
 - `assets/system_diagram.png`: latest corrected system architecture.
 - `assets/vision_frontend.png`: current manuscript stereo frontend figure.
-- `data/demo.mp4`: SeA-RVINS (Scalar) navigation demo (H.264 MP4).
+- `data/demo.mp4`: SeA-RVINS results visualization (H.264 MP4).
 - `data/trajectories.json`: ground truth plus the nine available final method tracks.
 - `gen_web_data.py`: portable trajectory export from the final benchmark directory.
 - `vendor/maplibre-gl.js`, `vendor/maplibre-gl.css`, `vendor/maplibre-LICENSE.txt`:
@@ -99,10 +99,3 @@ trajectories are deliberately not included until the final files are available.
 The manuscript tables are static: verify them against the current paper when
 updating results. The batch label refers to batch-wise robust weighting within
 the fixed-lag estimator, not an offline full-route solution.
-
-## Publication
-
-Serve the contents of this directory as the site root. This revision does not
-publish or deploy the site. Keep author information, personal source paths,
-identifying external links, and source PDFs out of the anonymous web bundle.
-Search indexing is discouraged through `noindex, nofollow` metadata.

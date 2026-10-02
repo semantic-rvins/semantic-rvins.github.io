@@ -17,7 +17,7 @@
   <div class="wrap">
     <a class="brand" href="#top">SeA<span>-</span>RVINS</a>
     <nav aria-label="Page sections">
-      <a href="#video">Video demo</a>
+      <a href="#video">Visualization example</a>
       <a href="#trajectories">Trajectories</a>
       <a href="#benchmark">Benchmark</a>
       <a href="#method">System</a>
@@ -29,11 +29,10 @@
     <h1>SeA-RVINS: Semantic-Aware Tightly Coupled RTK-Visual-Inertial System with Correlation-Preserving Robust Estimation for Urban Navigation</h1>
     <p class="hero-summary">Reliable urban pose estimation through semantic-aware visual tracking, correlation-preserving GNSS robust estimation, and verified ambiguity continuity.</p>
     <div class="btns">
-      <a class="btn ghost" href="#video">Video demo <span aria-hidden="true">↗</span></a>
-      <a class="btn ghost" href="#trajectories">Interactive trajectories <span aria-hidden="true">↗</span></a>
-      <a class="btn" href="#benchmark">Benchmark <span aria-hidden="true">↗</span></a>
+      <a class="btn ghost" href="#video">Visualization example <span aria-hidden="true">↗</span></a>
+      <a class="btn" href="#trajectories">Interactive trajectories <span aria-hidden="true">↗</span></a>
+      <a class="btn ghost" href="#benchmark">Benchmark <span aria-hidden="true">↗</span></a>
     </div>
-    <p class="hero-note">Supplementary figures and results for the submitted manuscript.</p>
   </div>
 </header>
 <main>
@@ -66,24 +65,24 @@
 
   <section id="video" class="section-soft" aria-labelledby="video-heading">
     <div class="wrap">
+      <div class="section-heading"><span class="section-number" aria-hidden="true">02</span><h2 id="video-heading">Visualization example</h2></div>
       <div class="video-intro">
-        <span class="review-label">SeA-RVINS (Scalar)</span>
-        <h2 id="video-heading">Tracking and Localization in a 3D Map</h2>
-        <p class="lead">Demo results from SeA-RVINS (Scalar), showing semantic masking and visual feature tracking alongside the estimated pose and trajectory in a 3D map.</p>
+        <span class="review-label">Tracking and Localization in a 3D Map</span>
+        <p class="lead">Recorded visualization of SeA-RVINS (Scalar) results, showing semantic masking and visual feature tracking alongside the estimated pose and trajectory in a 3D map.</p>
       </div>
       <figure class="video-demo">
-        <video autoplay muted controls loop playsinline preload="auto" width="1024" height="732" aria-label="SeA-RVINS (Scalar) navigation demo" aria-describedby="video-caption">
+        <video autoplay muted controls loop playsinline preload="auto" width="1024" height="732" aria-label="SeA-RVINS (Scalar) results visualization" aria-describedby="video-caption">
           <source src="data/demo.mp4" type="video/mp4">
-          Your browser does not support embedded video. <a href="data/demo.mp4">Open the SeA-RVINS (Scalar) demo video</a>.
+          Your browser does not support embedded video. <a href="data/demo.mp4">Open the SeA-RVINS (Scalar) visualization video</a>.
         </video>
-        <figcaption id="video-caption" class="caption"><strong>SeA-RVINS (Scalar).</strong> Synchronized visual tracking and 3D pose visualization. The visualized car is overlaid on the map's ground surface. The 30-second demo plays automatically and loops. <a href="data/demo.mp4">Open video</a>.</figcaption>
+        <figcaption id="video-caption" class="caption"><strong>SeA-RVINS (Scalar).</strong> Synchronized visual tracking and 3D pose visualization. The visualized car is overlaid on the map's ground surface. The 30-second video plays automatically and loops. <a href="data/demo.mp4">Open video</a>.</figcaption>
       </figure>
     </div>
   </section>
 
   <section id="trajectories">
     <div class="wrap">
-      <div class="section-heading"><span class="section-number" aria-hidden="true">02</span><h2>Interactive trajectories</h2></div>
+      <div class="section-heading"><span class="section-number" aria-hidden="true">03</span><h2>Interactive trajectories</h2></div>
       <p class="lead">Inspect the saved antenna-position estimates over the evaluated route. Toggle methods to compare tracks; gaps indicate unavailable solutions. Ground truth and SeA-RVINS (latent) are shown initially.</p>
       <div class="maprow">
         <div class="map-panel">
@@ -130,10 +129,9 @@
 
   <section id="benchmark" class="section-soft">
     <div class="wrap">
-      <div class="section-heading"><span class="section-number" aria-hidden="true">03</span><h2>Benchmark results</h2></div>
-      <p class="lead">Positioning and ambiguity-fixing results from the manuscript. Eight public baselines are compared with the batch, scalar, and latent-pivot configurations of SeA-RVINS.</p>
+      <div class="section-heading"><span class="section-number" aria-hidden="true">04</span><h2>Benchmark results</h2></div>
       <div class="protocol" aria-label="Evaluation protocol">
-        <span>TEX-CUP · May 9, 2019</span><span>18:09:40–19:16:59 UTC</span><span>4,040 epochs at 1 Hz</span><span>GNSS antenna position</span>
+        <span>TEX-CUP · May 9, 2019</span><span>18:09:40–19:16:59 UTC</span><span>4,040 epochs at 1 Hz</span>
       </div>
       <div class="tablewrap" tabindex="0" role="region" aria-label="Horizontal positioning results; scroll horizontally on small screens">
         <table>
@@ -180,7 +178,7 @@
 
   <section id="method">
     <div class="wrap">
-      <div class="section-heading"><span class="section-number" aria-hidden="true">04</span><h2>System architecture</h2></div>
+      <div class="section-heading"><span class="section-number" aria-hidden="true">05</span><h2>System architecture</h2></div>
       <p class="lead">GNSS, IMU, and stereo observations enter a 6-second fixed-lag factor graph. Integer ambiguity hypotheses are validated before accepted fixes are applied.</p>
       <figure class="fig">
         <div class="figure-frame"><a href="assets/system_diagram.png" target="_blank" rel="noopener" aria-label="Open system architecture figure at full resolution"><img width="3485" height="1425" src="assets/system_diagram.png" alt="SeA-RVINS architecture: GNSS preprocessing, inertial preintegration, and semantic-aware vision feed a factor graph with persistent landmarks, ambiguity continuation, and validated integer ambiguity resolution."></a></div>
