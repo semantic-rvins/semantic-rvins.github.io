@@ -129,7 +129,10 @@
 
   <section id="benchmark" class="section-soft">
     <div class="wrap">
-      <div class="section-heading"><span class="section-number" aria-hidden="true">04</span><h2>Benchmark results</h2></div>
+      <div class="benchmark-heading">
+        <div class="section-heading"><span class="section-number" aria-hidden="true">04</span><h2>Benchmark results</h2></div>
+        <a class="btn ghost" href="https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark" target="_blank" rel="noopener">Benchmark repository <span aria-hidden="true">↗</span></a>
+      </div>
       <div class="protocol" aria-label="Evaluation protocol">
         <span>TEX-CUP · May 9, 2019</span><span>18:09:40–19:16:59 UTC</span><span>4,040 epochs at 1 Hz</span>
       </div>
@@ -169,9 +172,15 @@
         </table>
       </div>
       <p class="caption">A used-fix epoch applies an accepted integer solution. Fix rates use all 4,040 evaluation epochs; the remaining error statistics are conditional on used-fix epochs.</p>
-      <div class="pending-note" id="benchmark-instructions">
-        <h3>Benchmark methods &amp; reproduction instructions <span class="status-badge">Pending</span></h3>
-        <p>Method setup, run instructions, implementation details, and evaluation commands will be added here.</p>
+      <div class="benchmark-resources" id="benchmark-instructions">
+        <h3>Benchmark methods &amp; reproduction</h3>
+        <p>The public <a href="https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark" target="_blank" rel="noopener">TEX-CUP Urban-Navigation Benchmark</a> provides data preparation, calibration, baseline run guides, and evaluation scripts, together with saved baseline and SeA-RVINS results.</p>
+        <div class="resource-links" aria-label="Benchmark documentation">
+          <a href="https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark/blob/main/RUN_INSTRUCTIONS.md" target="_blank" rel="noopener">Run instructions <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark/blob/main/data/README.md" target="_blank" rel="noopener">Data preparation <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark/blob/main/METHOD_SETUP_GUIDE.md" target="_blank" rel="noopener">Calibration &amp; setup <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark/blob/main/STATISTICS.md" target="_blank" rel="noopener">Evaluation &amp; statistics <span aria-hidden="true">↗</span></a>
+        </div>
       </div>
     </div>
   </section>

@@ -6,10 +6,10 @@ Urban Navigation**.
 
 The page contains the system architecture, learned stereo frontend, horizontal
 results from manuscript Table I, the IAR summary from Table II, interactive
-antenna trajectories, and a SeA-RVINS visualization video. Author information,
-publication links, and identifying repository links are intentionally absent.
-Benchmark setup and reproduction instructions and two remaining baseline
-trajectories are pending.
+antenna trajectories, and a SeA-RVINS visualization video. Benchmark setup,
+baseline run guides, evaluation scripts, and saved results are available in the
+public [TEX-CUP Urban-Navigation Benchmark](https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark)
+repository. Author information and publication links are intentionally absent.
 
 ## Preview
 
@@ -78,13 +78,33 @@ OpenFreeMap/OpenMapTiles/OSM attribution remains visible in the map.
 - `vendor/maplibre-gl.js`, `vendor/maplibre-gl.css`, `vendor/maplibre-LICENSE.txt`:
   pinned MapLibre GL JS 5.20.0 distribution and BSD license from the npm package.
 
+## Benchmark resources
+
+The webpage links to the public benchmark repository and its documentation:
+
+- [Run instructions](https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark/blob/main/RUN_INSTRUCTIONS.md)
+- [Data preparation](https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark/blob/main/data/README.md)
+- [Calibration and setup](https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark/blob/main/METHOD_SETUP_GUIDE.md)
+- [Evaluation and statistics](https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark/blob/main/STATISTICS.md)
+
+The public repository includes baseline run guides and saved SeA-RVINS results.
+TEX-CUP source recordings and ground truth are obtained separately from the
+publisher as described in the data-preparation guide.
+
 ## Update the trajectories
 
-With the benchmark repository next to this repository:
+Point the exporter at a local final evaluation collection:
 
 ```sh
-python3 gen_web_data.py --results ../../urban-navigation-benchmark/results/final
+python3 gen_web_data.py --results /path/to/results/final
 ```
+
+This exporter expects the original final-collection format: `ground_truth.log`,
+a matching `ground_truth_sha256` in the manifest, and the trajectory and
+evaluation files. The public release omits that ground-truth file and manifest
+field, so its `results/final` directory is not a drop-in input for this exporter.
+Use the public data-preparation and evaluation guides to rescore released
+trajectories; the webpage currently serves its existing bundled export.
 
 The exporter reads `comparison.json`, `table_selections.json`, the final
 trajectories, and the final antenna-2 / ALT1 ground truth. The evaluation window
@@ -94,8 +114,10 @@ retained. IC-GVINS uses only the selected prefix before 18:35:00 UTC, matching
 the combined final statistics. Threshold percentages use the entire evaluation
 window. The map initially shows ground truth and SeA-RVINS (latent).
 
-InGVIO and OKVIS2-X metrics are transcribed from the manuscript, but their
-trajectories are deliberately not included until the final files are available.
+The bundled map currently includes nine method tracks. InGVIO and OKVIS2-X
+trajectories are available in the public benchmark repository but are not yet
+included in this page's trajectory export. Their table metrics are transcribed
+from the manuscript.
 The manuscript tables are static: verify them against the current paper when
 updating results. The batch label refers to batch-wise robust weighting within
 the fixed-lag estimator, not an offline full-route solution.
