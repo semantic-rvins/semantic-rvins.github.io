@@ -68,14 +68,18 @@
       <div class="section-heading"><span class="section-number" aria-hidden="true">02</span><h2 id="video-heading">Visualization example</h2></div>
       <div class="video-intro">
         <span class="review-label">Tracking and Localization in a 3D Map</span>
-        <p class="lead">Recorded visualization of SeA-RVINS (Scalar) results, showing semantic masking and visual feature tracking alongside the estimated pose and trajectory in a 3D map.</p>
+        <p class="lead">Choose the Scalar or Latent configuration to view its recorded feature tracks and estimated trajectory on the 3D map.</p>
       </div>
       <figure class="video-demo">
-        <video autoplay muted controls loop playsinline preload="auto" width="1024" height="732" aria-label="SeA-RVINS (Scalar) results visualization" aria-describedby="video-caption">
-          <source src="data/demo.mp4" type="video/mp4">
-          Your browser does not support embedded video. <a href="data/demo.mp4">Open the SeA-RVINS (Scalar) visualization video</a>.
+        <fieldset class="video-options" id="video-options" hidden>
+          <legend>SeA-RVINS configuration</legend>
+          <label><input type="radio" name="video-configuration" value="Scalar" data-src="data/demo-scalar.mp4" aria-controls="visualization-player" checked> Scalar</label>
+          <label><input type="radio" name="video-configuration" value="Latent" data-src="data/demo-latent.mp4" aria-controls="visualization-player"> Latent</label>
+        </fieldset>
+        <video id="visualization-player" src="data/demo-scalar.mp4" autoplay muted controls loop playsinline preload="auto" width="1024" height="732" aria-labelledby="video-heading video-method" aria-describedby="video-caption">
+          Use the link below to open the recording.
         </video>
-        <figcaption id="video-caption" class="caption"><strong>SeA-RVINS (Scalar).</strong> Synchronized visual tracking and 3D pose visualization. The visualized car is overlaid on the map's ground surface. The 30-second video plays automatically and loops. <a href="data/demo.mp4">Open video</a>.</figcaption>
+        <figcaption id="video-caption" class="caption"><strong id="video-method">SeA-RVINS (Scalar)</strong>. Synchronized visual tracking and 3D pose visualization. The visualized car is overlaid on the map's ground surface. The 30-second video plays automatically and loops. <a id="video-open" href="data/demo-scalar.mp4">Open video</a>.<noscript> <a href="data/demo-latent.mp4">Open the Latent recording</a>.</noscript></figcaption>
       </figure>
     </div>
   </section>
@@ -203,6 +207,7 @@
   </section>
 </main>
 <footer><div class="wrap"><span>SeA-RVINS</span><a href="#top">Back to top ↑</a></div></footer>
+<script src="video.js"></script>
 <script src="vendor/maplibre-gl.js"></script>
 <script src="app.js"></script>
 </body>

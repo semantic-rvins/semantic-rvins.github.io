@@ -6,7 +6,7 @@ Urban Navigation**.
 
 The page contains the system architecture, learned stereo frontend, horizontal
 results from manuscript Table I, the IAR summary from Table II, interactive
-antenna trajectories, and a SeA-RVINS visualization video. Benchmark setup,
+antenna trajectories, and selectable Scalar and Latent visualization videos. Benchmark setup,
 baseline run guides, evaluation scripts, and saved results are available in the
 public [TEX-CUP Urban-Navigation Benchmark](https://github.com/semantic-rvins/TEXCUP-UrbanNav-Benchmark)
 repository. Author information and publication links are intentionally absent.
@@ -33,15 +33,13 @@ Referer header when anonymizing the page. Browser caching remains enabled.
 
 ## Visualization Example
 
-The 30-second SeA-RVINS visualization is embedded from `data/demo.mp4` with
-muted autoplay, native playback controls, inline playback on mobile, and automatic
-looping. It shows semantic masking and visual feature tracking alongside the
-estimated pose and trajectory in a 3D map. The player preserves the original
-1024 × 732 aspect ratio and uses automatic preloading for playback on page load.
-If a browser blocks autoplay, the native controls let visitors start playback.
-The visualized car is overlaid on the map's ground surface.
+Use the configuration selector above the player to switch between the Scalar
+(default) and Latent recordings. Only the selected recording loads. The caption
+and direct video link follow the selection. Both recordings run for 30 seconds
+at 1024 × 732, with muted autoplay, inline playback, looping, and native
+controls. The visualized car is overlaid on the map's ground surface.
 
-The video is stored with Git LFS. After cloning, retrieve the video before previewing:
+Both recordings use Git LFS. After cloning, retrieve them before previewing:
 
 ```sh
 git lfs install --local
@@ -72,7 +70,8 @@ OpenFreeMap/OpenMapTiles/OSM attribution remains visible in the map.
 - `app.js`: MapLibre viewer, building/camera controls, and trajectory comparison.
 - `assets/system_diagram.png`: latest corrected system architecture.
 - `assets/vision_frontend.png`: current manuscript stereo frontend figure.
-- `data/demo.mp4`: SeA-RVINS results visualization (H.264 MP4).
+- `video.js`: switches the visualization player between configurations.
+- `data/demo-scalar.mp4` and `data/demo-latent.mp4`: Scalar and Latent recordings (H.264 MP4).
 - `data/trajectories.json`: ground truth plus the nine available final method tracks.
 - `gen_web_data.py`: portable trajectory export from the final benchmark directory.
 - `vendor/maplibre-gl.js`, `vendor/maplibre-gl.css`, `vendor/maplibre-LICENSE.txt`:

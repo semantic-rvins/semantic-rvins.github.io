@@ -10,7 +10,7 @@ Urban Navigation**.
 
 The static site is in [`project-webpage/`](project-webpage/). It includes the
 system and visual frontend figures, manuscript benchmark results, an interactive
-trajectory viewer, and a looping visualization video.
+trajectory viewer, and selectable Scalar and Latent visualization videos.
 
 Preview from the repository root:
 

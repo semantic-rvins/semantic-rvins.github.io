@@ -133,6 +133,11 @@ tbody tr:hover > * { background: #e9f1ec; }
 .video-intro .review-label { margin-bottom: 18px; }
 .video-intro .lead { margin-bottom: 0; }
 .video-demo { max-width: 1024px; margin: 28px auto 0; }
+.video-options { margin: 0 0 14px; padding: 0; border: 0; }
+.video-options legend { margin-bottom: 6px; padding: 0; font-size: 13px; font-weight: 650; }
+.video-options label { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 5px 14px; border: 1px solid var(--border); border-radius: 6px; background: white; font-size: 13px; cursor: pointer; }
+.video-options input { margin: 0; accent-color: var(--accent); }
+.video-options label:has(:checked) { border-color: #b7d4c4; background: var(--accent-soft); color: var(--accent); }
 .video-demo video { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; background: #162823; }
 footer { border-top: 1px solid var(--border); padding: 26px 0 35px; color: var(--muted); font-size: 11px; }
 footer .wrap { display: flex; justify-content: space-between; gap: 15px; flex-wrap: wrap; }
